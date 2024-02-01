@@ -13,7 +13,7 @@ from tqdm import tqdm
 from tabulate import tabulate
 
 # Configure the socket to use Tor
-socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)  # 9050 est le port par défaut de Tor
+socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)  # 9050 is default Tor port
 socket.socket = socks.socksocket
 
 # Display banner on startup
