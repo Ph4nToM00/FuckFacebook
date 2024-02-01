@@ -44,6 +44,7 @@ def adjust_table_width(table_instance):
         print(format_str.format(*row))
 
 
+
 def pass_the_captcha():
     """Handles the CAPTCHA challenge for the given onion website."""
     url_index = "http://4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion/"
@@ -92,17 +93,16 @@ def main(URL_TOKEN, max_results=None):
         if table:
             headers = [th.text.strip() for th in table.find_all('th')]
             data = []
+            max_header_length = max(len(header.strip()) for header in headers)
 
-            # Use tqdm for the progress bar
-            for row in tqdm(table.find_all('tr')[1:], desc="Processing rows", unit="row"):
+
+            for row in table.find_all('tr')[1:]:
                 row_data = [td.text.strip() for td in row.find_all('td')]
                 data.append(row_data)
 
-                # Check if max_results is specified and reached
                 if max_results is not None and len(data) >= max_results:
                     break
 
-            # Adjust and print the data table
             table_instance = [headers] + data
             adjust_table_width(table_instance)
             print("\nDirect Link to Facebook profile:\n")
@@ -111,6 +111,7 @@ def main(URL_TOKEN, max_results=None):
                 print(fb_url)
         else:
             print("No results found.")
+
 
 if __name__ == '__main__':
     # Parse arguments from the command line
