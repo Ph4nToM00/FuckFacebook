@@ -1,7 +1,6 @@
 import argparse
 import requests
 from bs4 import BeautifulSoup
-from terminaltables import SingleTable
 import sys
 import time
 from colorama import Fore, Style
@@ -11,6 +10,7 @@ from static.banner import display_banner
 import socks
 import socket
 from tqdm import tqdm
+from tabulate import tabulate
 
 # Configure the socket to use Tor
 socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)  # 9050 est le port par défaut de Tor
@@ -30,9 +30,19 @@ def get_terminal_width():
 def adjust_table_width(table_instance):
     """Adjust the width of the table according to the terminal's width."""
     terminal_width = get_terminal_width()
-    num_columns = len(table_instance.table_data[0])
-    column_width = terminal_width // num_columns
-    table_instance.column_max_width = {index: column_width - 3 for index in range(num_columns)}
+    num_columns = len(table_instance[0])
+    # Calculate the maximum width for each column
+    max_column_widths = [max(len(str(row[i])) for row in table_instance) for i in range(num_columns)]
+    # Set a minimum fixed width
+    fixed_column_width = 5
+    # Adjust column width dynamically
+    adjusted_column_widths = [max(max_column_widths[i], fixed_column_width) for i in range(num_columns)]
+    # Create a format string to adjust the column widths
+    format_str = "|".join(["{{:<{}}}".format(adjusted_column_widths[i]) for i in range(num_columns)])
+    # Print the table with adjusted column widths
+    for row in table_instance:
+        print(format_str.format(*row))
+
 
 def pass_the_captcha():
     """Handles the CAPTCHA challenge for the given onion website."""
@@ -93,12 +103,8 @@ def main(URL_TOKEN, max_results=None):
                     break
 
             # Adjust and print the data table
-            table_instance = SingleTable([headers] + data)
+            table_instance = [headers] + data
             adjust_table_width(table_instance)
-            table_instance.inner_heading_row_border = False
-            table_instance.inner_row_border = True
-            table_instance.justify_columns = {index: 'center' for index in range(len(headers))}
-            print(table_instance.table)
             print("\nDirect Link to Facebook profile:\n")
             for row in data:
                 fb_url = f"https://www.facebook.com/profile.php?id={row[0]}"
