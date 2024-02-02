@@ -28,19 +28,28 @@ def get_terminal_width():
     return int(columns)
 
 def adjust_table_width(table_instance):
-    """Adjust the width of the table according to the terminal's width."""
-    terminal_width = get_terminal_width()
-    num_columns = len(table_instance[0])
-    # Calculate the maximum width for each column
-    max_column_widths = [max(len(str(row[i])) for row in table_instance) for i in range(num_columns)]
-    # Set a minimum fixed width
-    fixed_column_width = 5
-    # Adjust column width dynamically
-    adjusted_column_widths = [max(max_column_widths[i], fixed_column_width) for i in range(num_columns)]
-    # Create a format string to adjust the column widths
-    format_str = "|".join(["{{:<{}}}".format(adjusted_column_widths[i]) for i in range(num_columns)])
-    # Print the table with adjusted column widths
-    for row in table_instance:
+    """Ajuste la largeur du tableau en fonction de la largeur du terminal."""
+    largeur_terminal = get_terminal_width()
+    num_colonnes = len(table_instance[0])
+    # Utilise colorama pour formater le texte de l'en-tête en gras
+    format_en_tete = f"{Fore.GREEN}{Style.BRIGHT}{{:<{largeur_terminal}}}{Style.RESET_ALL}"
+    # Ajoute une ligne supérieure du rectangle
+    ligne_superieure = "+" + "-" * (largeur_terminal - 2) + "+"
+    print(f"{Fore.GREEN}{ligne_superieure}{Style.RESET_ALL}")
+    # Calcule la largeur maximale pour chaque colonne
+    largeurs_max_colonnes = [max(len(str(row[i])) for row in table_instance) for i in range(num_colonnes)]
+    # Définit une largeur minimale fixe
+    largeur_colonne_fixe = 5
+    # Ajuste la largeur de la colonne dynamiquement
+    largeurs_colonnes_ajustees = [max(largeurs_max_colonnes[i], largeur_colonne_fixe) for i in range(num_colonnes)]
+    # Crée une chaîne de format pour ajuster les largeurs des colonnes
+    format_str = "|".join([f"{{:<{largeurs_colonnes_ajustees[i]}}}" for i in range(num_colonnes)])
+    # Imprime le tableau avec les largeurs des colonnes ajustées et l'en-tête formaté en gras
+    print(f"{Fore.GREEN}|{Style.RESET_ALL}{format_en_tete.format(format_str.format(*table_instance[0]))}", end="")
+    # Ajoute une ligne inférieure du rectangle
+    ligne_inferieure = "+" + "-" * (largeur_terminal - 3) + "+"
+    print(f"{Fore.GREEN}{ligne_inferieure}{Style.RESET_ALL}")
+    for row in table_instance[1:]:
         print(format_str.format(*row))
 
 
@@ -69,6 +78,8 @@ def pass_the_captcha():
 
 def main(URL_TOKEN, max_results=None):
     """Main function to scrape and display data from the onion website."""
+    
+    animation = "|/-\\"
     # Filter out parameters that are empty
     filtered_params = {key: value for key, value in params.items() if value}
     search_url = "http://4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion/search?" + "&".join(f"{key}={value}" for key, value in filtered_params.items())
@@ -81,7 +92,19 @@ def main(URL_TOKEN, max_results=None):
         response = session.get(search_url, allow_redirects=True)
 
     soup = BeautifulSoup(response.content, 'html.parser')
+    
+    start_time = time.time()
+    while True:
+        for i in range(4):
+            time.sleep(0.2)
+            sys.stdout.write("\rSearching " + animation[i % len(animation)])
+            sys.stdout.flush()
 
+        print() 
+
+        if time.time() - start_time > 0: 
+            break
+        
     # Handle CAPTCHA if presented
     if "fill" in response.text:
         # Use tqdm for the progress bar
@@ -90,16 +113,15 @@ def main(URL_TOKEN, max_results=None):
         pass_the_captcha()
     else:
         table = soup.find('table')
+        table = soup.find('table')
         if table:
             headers = [th.text.strip() for th in table.find_all('th')]
             data = []
             max_header_length = max(len(header.strip()) for header in headers)
 
-
             for row in table.find_all('tr')[1:]:
                 row_data = [td.text.strip() for td in row.find_all('td')]
                 data.append(row_data)
-
                 if max_results is not None and len(data) >= max_results:
                     break
 
@@ -110,7 +132,7 @@ def main(URL_TOKEN, max_results=None):
                 fb_url = f"https://www.facebook.com/profile.php?id={row[0]}"
                 print(fb_url)
         else:
-            print("No results found.")
+            print("\nNo results found.")
 
 
 if __name__ == '__main__':
