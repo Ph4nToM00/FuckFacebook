@@ -4,7 +4,6 @@ tabulate
 bs4
 colorama
 terminaltables
-PrettyTable
 socks
 socket
 tqdm
