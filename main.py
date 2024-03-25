@@ -94,28 +94,6 @@ def read_captcha_token():
         return None
 
 
-# Placez ce code juste avant la définition de la fonction main()
-def print_custom_table(data, max_width=80):
-    if not data:
-        print("No data to display.")
-        return
-
-    # Calcul de la largeur de chaque colonne en fonction de la largeur maximale
-    num_columns = len(data[0])
-    column_widths = [max_width // num_columns] * num_columns
-
-    # Afficher l'en-tête
-    headers = data[0]
-    header_row = "|".join(header.center(column_widths[i]) for i, header in enumerate(headers))
-    print(header_row)
-    print("-" * max_width)  # Séparateur d'en-tête
-
-    # Afficher les lignes de données
-    for row in data[1:]:
-        formatted_row = "|".join(str(cell).center(column_widths[i]) for i, cell in enumerate(row))
-        print(formatted_row)
-
-
 def main(URL_TOKEN=None, max_results=None):
     """Main function to scrape and display data from the onion website"""
     URL_TOKEN = read_captcha_token()
@@ -145,20 +123,19 @@ def main(URL_TOKEN=None, max_results=None):
         table = soup.find('table')
         if table:
             headers = [th.text.strip() for th in table.find_all('th')]
-            data = [headers]
+            data = []
 
             # Use tqdm for the progress bar
-            for row in table.find_all('tr')[1:]:  # Début avec la deuxième ligne pour sauter les en-têtes
+            for row in tqdm(table.find_all('tr')[1:], desc="Processing rows", unit="row"):
                 row_data = [td.text.strip() for td in row.find_all('td')]
                 data.append(row_data)
 
-
                 # Check if max_results is specified and reached
-                if max_results is not None and len(data) > max_results:
+                if max_results is not None and len(data) >= max_results:
                     break
 
             # Adjust and print the data table
-            table_instance = print_custom_table(data, max_width=80)
+            table_instance = SingleTable([headers] + data)
             adjust_table_width(table_instance)
             table_instance.inner_heading_row_border = False
             table_instance.inner_row_border = True
