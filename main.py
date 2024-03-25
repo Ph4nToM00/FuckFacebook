@@ -49,6 +49,12 @@ def adjust_table_width(table_instance):
     column_width = max(available_width // num_columns, column_min_width) 
 
     table_instance.column_max_width = {index: column_width for index in range(num_columns)}
+    
+def adjust_table_width_fixed_max(table_instance, max_width=80):
+    """Adjust the width of the table to a fixed maximum width."""
+    num_columns = len(table_instance.table_data[0])
+    column_width = max_width // num_columns  
+    table_instance.column_max_width = {index: column_width for index in range(num_columns)}
 
 
 def pass_the_captcha():
