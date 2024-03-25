@@ -15,7 +15,7 @@ from tqdm import tqdm
 socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)  # 9050 est le port par défaut de Tor
 socket.socket = socks.socksocket
 
-TOKEN_FILE = 'captcha_token.txt' 
+TOKEN_FILE = 'captcha_token.txt'
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -42,18 +42,19 @@ def adjust_table_width(table_instance):
     """Adjust the width of the table according to the terminal's width."""
     terminal_width = get_terminal_width()
     num_columns = len(table_instance.table_data[0])
-    padding = 3 
-    column_min_width = 10 
+    padding = 3
+    column_min_width = 10
 
-    available_width = terminal_width - (num_columns * padding) 
-    column_width = max(available_width // num_columns, column_min_width) 
+    available_width = terminal_width - (num_columns * padding)
+    column_width = max(available_width // num_columns, column_min_width)
 
     table_instance.column_max_width = {index: column_width for index in range(num_columns)}
-    
+
+
 def adjust_table_width_fixed_max(table_instance, max_width=80):
     """Adjust the width of the table to a fixed maximum width."""
     num_columns = len(table_instance.table_data[0])
-    column_width = max_width // num_columns  
+    column_width = max_width // num_columns
     table_instance.column_max_width = {index: column_width for index in range(num_columns)}
 
 
@@ -82,7 +83,8 @@ def save_captcha_token(token):
     """Sauvegarder le token captcha dans un fichier."""
     with open(TOKEN_FILE, 'w') as file:
         file.write(token)
-        
+
+
 def read_captcha_token():
     """Lire le token captcha depuis un fichier. Retourne None si le fichier n'existe pas."""
     try:
@@ -91,17 +93,40 @@ def read_captcha_token():
     except FileNotFoundError:
         return None
 
+
+# Placez ce code juste avant la définition de la fonction main()
+def print_custom_table(data, max_width=80):
+    if not data:
+        print("No data to display.")
+        return
+
+    # Calcul de la largeur de chaque colonne en fonction de la largeur maximale
+    num_columns = len(data[0])
+    column_widths = [max_width // num_columns] * num_columns
+
+    # Afficher l'en-tête
+    headers = data[0]
+    header_row = "|".join(header.center(column_widths[i]) for i, header in enumerate(headers))
+    print(header_row)
+    print("-" * max_width)  # Séparateur d'en-tête
+
+    # Afficher les lignes de données
+    for row in data[1:]:
+        formatted_row = "|".join(str(cell).center(column_widths[i]) for i, cell in enumerate(row))
+        print(formatted_row)
+
+
 def main(URL_TOKEN=None, max_results=None):
     """Main function to scrape and display data from the onion website"""
     URL_TOKEN = read_captcha_token()
-    if not URL_TOKEN:  # Si aucun token n'est sauvegardé, en obtenir un nouveau
+    if not URL_TOKEN:
         URL_TOKEN = pass_the_captcha()
 
     # Filter out parameters that are empty
     filtered_params = {key: value for key, value in params.items() if value}
     search_url = "http://4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion/search?" + "&".join(f"{key}={value}" for key, value in filtered_params.items())
     search_url += "&s={}&r=*any*&g=*any*".format(URL_TOKEN)
-    
+
     # Use the Tor proxy for the request
     with requests.Session() as session:
         session.verify = False
@@ -120,19 +145,20 @@ def main(URL_TOKEN=None, max_results=None):
         table = soup.find('table')
         if table:
             headers = [th.text.strip() for th in table.find_all('th')]
-            data = []
+            data = [headers]
 
             # Use tqdm for the progress bar
-            for row in tqdm(table.find_all('tr')[1:], desc="Processing rows", unit="row"):
+            for row in table.find_all('tr')[1:]:  # Début avec la deuxième ligne pour sauter les en-têtes
                 row_data = [td.text.strip() for td in row.find_all('td')]
                 data.append(row_data)
 
+
                 # Check if max_results is specified and reached
-                if max_results is not None and len(data) >= max_results:
+                if max_results is not None and len(data) > max_results:
                     break
 
             # Adjust and print the data table
-            table_instance = SingleTable([headers] + data)
+            table_instance = print_custom_table(data, max_width=80)
             adjust_table_width(table_instance)
             table_instance.inner_heading_row_border = False
             table_instance.inner_row_border = True
