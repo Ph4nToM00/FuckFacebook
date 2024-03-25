@@ -15,6 +15,8 @@ from tqdm import tqdm
 socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)  # 9050 est le port par défaut de Tor
 socket.socket = socks.socksocket
 
+TOKEN_FILE = 'captcha_token.txt' 
+
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -61,12 +63,27 @@ def pass_the_captcha():
     }
 
     req_captcha = requests.post(url_captcha, verify=False, data=datas, proxies={'http': 'socks5h://localhost:9050', 'https': 'socks5h://localhost:9050'})
+    save_captcha_token(req_captcha.url.split("=")[-1])
     return req_captcha.url.split("=")[-1]
 
+def save_captcha_token(token):
+    """Sauvegarder le token captcha dans un fichier."""
+    with open(TOKEN_FILE, 'w') as file:
+        file.write(token)
+        
+def read_captcha_token():
+    """Lire le token captcha depuis un fichier. Retourne None si le fichier n'existe pas."""
+    try:
+        with open(TOKEN_FILE, 'r') as file:
+            return file.read().strip()
+    except FileNotFoundError:
+        return None
 
 def main(URL_TOKEN=None, max_results=None):
     """Main function to scrape and display data from the onion website"""
-    URL_TOKEN = pass_the_captcha()  # Get URL_TOKEN
+    URL_TOKEN = read_captcha_token()
+    if not URL_TOKEN:  # Si aucun token n'est sauvegardé, en obtenir un nouveau
+        URL_TOKEN = pass_the_captcha()
 
     # Filter out parameters that are empty
     filtered_params = {key: value for key, value in params.items() if value}
