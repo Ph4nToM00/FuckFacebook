@@ -139,7 +139,7 @@ def main(URL_TOKEN=None, max_results=None):
                     break
             # Adjust and print the data table
             table_instance = SingleTable([headers] + data)
-            adjust_table_width(table_instance)
+           
             table_instance.inner_heading_row_border = False
             table_instance.inner_row_border = True
             table_instance.justify_columns = {index: 'center' for index in range(len(headers))}
