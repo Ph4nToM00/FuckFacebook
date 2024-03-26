@@ -58,20 +58,27 @@ def adjust_table_width_fixed_max(table_instance, max_width=50):
     table_instance.column_max_width = {index: column_width for index in range(num_columns)}
 
 
+def truncate_content(content, max_width):
+    """Tronquer le contenu des cellules pour qu'il ne dépasse pas la largeur maximale."""
+    return (content[:max_width - 3] + '...') if len(content) > max_width else content
+
 def adjust_table_width_dynamic(table_instance, max_column_width=20):
-    """Adjust the table's column widths based on content, with a maximum width."""
+    """Adjust the table's column widths based on content, with a maximum width and content truncation."""
     terminal_width = get_terminal_width()
     content_widths = [max(len(str(cell)) for cell in column) for column in zip(*table_instance.table_data)]
-    content_widths = [min(max_column_width, width) for width in content_widths]  # Limiter la largeur max
+    content_widths = [min(max_column_width, width) for width in content_widths]
 
-    total_content_width = sum(content_widths) + (len(content_widths) - 1) * 3  # Espaces entre colonnes
+    total_content_width = sum(content_widths) + (len(content_widths) - 1) * 3
     if total_content_width > terminal_width:
-        # Réduire proportionnellement la largeur des colonnes si nécessaire
         scale_factor = terminal_width / total_content_width
-        content_widths = [max(5, int(width * scale_factor)) for width in content_widths]  # Largeur min de 5
+        content_widths = [max(5, int(width * scale_factor)) for width in content_widths]
 
-    # Appliquer la largeur ajustée à chaque colonne
-    table_instance.column_max_width = {index: width for index, width in enumerate(content_widths)}
+    # Appliquer la largeur ajustée à chaque colonne et tronquer le contenu si nécessaire
+    for i, width in enumerate(content_widths):
+        table_instance.column_max_width[i] = width
+        for row in table_instance.table_data:
+            row[i] = truncate_content(str(row[i]), width)
+
 
 
 def pass_the_captcha():
@@ -149,7 +156,6 @@ def main(URL_TOKEN=None, max_results=None):
                 # Check if max_results is specified and reached
                 if max_results is not None and len(data) >= max_results:
                     break
-
             # Adjust and print the data table
             table_instance = SingleTable([headers] + data)
             adjust_table_width(table_instance)
