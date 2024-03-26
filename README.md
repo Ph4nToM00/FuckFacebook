@@ -57,6 +57,6 @@ Osint tools for information retrieval via facebook (Python 3.X)
 
 # Donations
 
-![Example](https://ibb.co/TKTh80M)
+![QRCode](https://i.ibb.co/CJt079K/qrcode.png)
 
 
