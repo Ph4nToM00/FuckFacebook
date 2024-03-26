@@ -73,7 +73,6 @@ def adjust_table_width_dynamic(table_instance, max_column_width=20):
         scale_factor = terminal_width / total_content_width
         content_widths = [max(5, int(width * scale_factor)) for width in content_widths]
 
-    # Appliquer la largeur ajustée à chaque colonne et tronquer le contenu si nécessaire
     for i, width in enumerate(content_widths):
         table_instance.column_max_width[i] = width
         for row in table_instance.table_data:
