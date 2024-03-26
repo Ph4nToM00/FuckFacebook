@@ -57,5 +57,6 @@ Osint tools for information retrieval via facebook (Python 3.X)
 
 # Donations
 
-https://www.paypal.me/UnderRadio
+![Example](https://ibb.co/TKTh80M)
+
 
