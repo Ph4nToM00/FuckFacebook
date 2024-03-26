@@ -116,6 +116,8 @@ def read_captcha_token():
     except FileNotFoundError:
         return None
 
+def clean_input(input_string):
+    return input_string.strip()
 
 def main(URL_TOKEN=None, max_results=None):
     """Main function to scrape and display data from the onion website"""
@@ -197,9 +199,9 @@ if __name__ == '__main__':
 
     # Create a dictionary with all the provided search parameters
     params = {
-        'i': args.id if args.id else '',
-        'f': args.firstname if args.firstname else '',
-        'l': args.lastname if args.lastname else '',
+        'i': clean_input(args.id) if args.id else '',
+        'f': clean_input(args.firstname) if args.firstname else '',
+        'l': clean_input(args.lastname) if args.lastname else '',
         't': args.phone if args.phone else '',
         'w': args.work if args.work else '',
         'o': args.location if args.location else ''
