@@ -151,13 +151,13 @@ def main(URL_TOKEN=None, max_results=None):
             data = []
 
             # Use tqdm for the progress bar
-            for row in tqdm(table.find_all('tr')[1:], desc="Processing rows", unit="row"):
+            """ for row in tqdm(table.find_all('tr')[1:], desc="Processing rows", unit="row"):
                 row_data = [td.text.strip() for td in row.find_all('td')]
                 data.append(row_data)
 
                 # Check if max_results is specified and reached
                 if max_results is not None and len(data) >= max_results:
-                    break
+                    break """
             # Adjust and print the data table
             table_instance = SingleTable([headers] + data)
             adjust_table_width(table_instance)
