@@ -58,6 +58,22 @@ def adjust_table_width_fixed_max(table_instance, max_width=50):
     table_instance.column_max_width = {index: column_width for index in range(num_columns)}
 
 
+def adjust_table_width_dynamic(table_instance, max_column_width=20):
+    """Adjust the table's column widths based on content, with a maximum width."""
+    terminal_width = get_terminal_width()
+    content_widths = [max(len(str(cell)) for cell in column) for column in zip(*table_instance.table_data)]
+    content_widths = [min(max_column_width, width) for width in content_widths]  # Limiter la largeur max
+
+    total_content_width = sum(content_widths) + (len(content_widths) - 1) * 3  # Espaces entre colonnes
+    if total_content_width > terminal_width:
+        # Réduire proportionnellement la largeur des colonnes si nécessaire
+        scale_factor = terminal_width / total_content_width
+        content_widths = [max(5, int(width * scale_factor)) for width in content_widths]  # Largeur min de 5
+
+    # Appliquer la largeur ajustée à chaque colonne
+    table_instance.column_max_width = {index: width for index, width in enumerate(content_widths)}
+
+
 def pass_the_captcha():
     """Handles the CAPTCHA challenge for the given onion website and returns URL_TOKEN."""
     url_index = "http://4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion/"
@@ -140,6 +156,7 @@ def main(URL_TOKEN=None, max_results=None):
             table_instance.inner_heading_row_border = False
             table_instance.inner_row_border = True
             table_instance.justify_columns = {index: 'center' for index in range(len(headers))}
+            adjust_table_width_dynamic(table_instance)
             print(table_instance.table)
             print("\nDirect Link to Facebook profile:\n")
             for row in data:
