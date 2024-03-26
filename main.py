@@ -38,25 +38,6 @@ def get_terminal_width():
     rows, columns = os.popen('stty size', 'r').read().split()
     return int(columns)
 
-def adjust_table_width(table_instance):
-    """Adjust the width of the table according to the terminal's width."""
-    terminal_width = get_terminal_width()
-    num_columns = len(table_instance.table_data[0])
-    padding = 3
-    column_min_width = 15
-
-    available_width = terminal_width - (num_columns * padding)
-    column_width = max(available_width // num_columns, column_min_width)
-
-    table_instance.column_max_width = {index: column_width for index in range(num_columns)}
-
-
-def adjust_table_width_fixed_max(table_instance, max_width=50):
-    """Adjust the width of the table to a fixed maximum width."""
-    num_columns = len(table_instance.table_data[0])
-    column_width = max_width // num_columns
-    table_instance.column_max_width = {index: column_width for index in range(num_columns)}
-
 
 def truncate_content(content, max_width):
     """Tronquer le contenu des cellules pour qu'il ne dépasse pas la largeur maximale."""
